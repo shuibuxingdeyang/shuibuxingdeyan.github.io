@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="zh-CN"> 
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>爱心温馨提示</title>
+    <style>
+        .tip-box {
+            position: absolute;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-family: "仿宋", serif;
+            font-size: 14px;
+            text-align: center;
+            z-index: 9999;
+            animation: pop 0.3s ease-out;
+        }
+        @keyframes pop {
+            0% { transform: scale(0); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        body { margin: 0; padding: 0; overflow: hidden; height: 100vh; background: #fff; }
+    </style>
+</head>
+<body>
+    <script>
+        // 提示文字
+        const tips = [
+            '好好吃饭','好好休息','早点休息','天天开心',
+            '记得喝水','按时吃饭','别熬夜了','照顾好自己',
+            '注意身体','记得运动','放松一下','保持微笑'
+        ];
+        // 粉色系背景色
+        const bgColors = [
+            'lightpink', 'hotpink', 'pink', 'mistyrose',
+            'lavenderblush', 'palevioletred'
+        ];
+        // 生成爱心坐标（适配手机屏幕）
+        function generateHeartCoords(winWidth, winHeight, scale=25) {
+            const coords = [];
+            // 爱心参数方程
+            for (let t = 0; t < 360; t += 4) {
+                const tRad = Math.radians(t);
+                let x = 16 * Math.sin(tRad)**3;
+                let y = 13 * Math.cos(tRad) - 5 * Math.cos(2*tRad) - 2 * Math.cos(3*tRad) - Math.cos(4*tRad);
+                // 缩放+居中+适配手机
+                x = winWidth/2 + x * scale;
+                y = winHeight/2 - y * scale;
+                coords.push([x, y]);
+            }
+            // 填充爱心内部
+            const minX = Math.min(...coords.map(p => p[0])), maxX = Math.max(...coords.map(p => p[0]));
+            const minY = Math.min(...coords.map(p => p[1])), maxY = Math.max(...coords.map(p => p[1]));
+            for (let i = 0; i < 150; i++) {
+                const x = Math.random() * (maxX - minX) + minX;
+                const y = Math.random() * (maxY - minY) + minY;
+                const relX = (x - winWidth/2)/scale;
+                const relY = -(y - winHeight/2)/scale;
+                if ((relX**2 + relY**2 - 1)**3 - relX**2 * relY**3 <= 0.1) {
+                    coords.push([x, y]);
+                }
+            }
+            return coords;
+        }
+        // 扩展Math.radians方法
+        Math.radians = function(degrees) { return degrees * Math.PI / 180; };
+        // 创建爱心弹窗
+        function createTip(x, y) {
+            const tipBox = document.createElement('div');
+            tipBox.className = 'tip-box';
+            tipBox.textContent = tips[Math.floor(Math.random() * tips.length)];
+            tipBox.style.backgroundColor = bgColors[Math.floor(Math.random() * bgColors.length)];
+            tipBox.style.left = `${x}px`;
+            tipBox.style.top = `${y}px`;
+            document.body.appendChild(tipBox);
+            // 显示8秒后淡出
+            setTimeout(() => {
+                tipBox.style.opacity = '0';
+                tipBox.style.transition = 'opacity 0.8s';
+                setTimeout(() => tipBox.remove(), 800);
+            }, 8000);
+        }
+        // 初始化（适配手机屏幕）
+        const winWidth = window.innerWidth;
+        const winHeight = window.innerHeight;
+        const heartCoords = generateHeartCoords(winWidth, winHeight);
+        // 批量创建弹窗
+        heartCoords.forEach(([x, y], idx) => {
+            setTimeout(() => createTip(x, y), idx * 15);
+        });
+    </script>
+</body>
+</html>
